@@ -61,9 +61,32 @@ const arrayLinks = (route) => {
   return links;
 };
 
-console.log(arrayLinks('/home/laboratoria/LabProyectos/LIM014-mdlinks/1.md'));
+console.log('64', arrayLinks('/home/laboratoria/LabProyectos/LIM014-mdlinks/1.md'));
 
+const allArrayLinks = (route) => {
+  let allLinks = [];
+  const links = archivo(route);
+  links.forEach((route) => {
+    allLinks = allLinks.concat(arrayLinks(route));
+  });
+  return allLinks;
+};
+console.log('74', allArrayLinks('/home/laboratoria/LabProyectos/LIM014-mdlinks/1.md'));
 
+const statsList = (route) => {
+  const allLinks = allArrayLinks(route);
+  const statsList = [];
+
+  allLinks.forEach((element) => {
+    if (!statsList.includes(element.href)) statsList.push(element.href);
+  });
+  const all = allLinks.length;
+  const unique = statsList.length;
+
+  return [`Total : ${all}`, `Unique : ${unique}`];
+};
+
+console.log('88', statsList('/home/laboratoria/LabProyectos/LIM014-mdlinks/1.md'));
 
 module.exports = {
   miFuncion,
