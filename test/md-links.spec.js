@@ -25,3 +25,19 @@ describe('Comprobar que la funcion archivo funciona', () => {
     expect(mdLinks.archivo('/home/laboratoria/LabProyectos/LIM014-mdlinks/src/index.js')).toStrictEqual(['1.md', 'README.md']);
   });
 });
+describe('Comprobar que la funcion LerrArchivo funciona', () => {
+  it('is a function', () => {
+    expect(typeof mdLinks.leerArchivo).toBe('function');
+  });
+});
+describe('Comprobar que la funcion arrayLinks funciona', () => {
+  it('is a function', () => {
+    expect(typeof mdLinks.arrayLinks).toBe('function');
+  });
+  it('Muestra las extesionex .md', () => {
+    expect(mdLinks.archivo('/home/laboratoria/LabProyectos/LIM014-mdlinks')).toEqual(['1.md', 'README.md']);
+  });
+  it('Verificar si es un directorio', () => { // PREGUNTAR SOBRE ESTEEEEE TEST QUE NO ME FUNCIONA.
+    expect(mdLinks.archivo('/home/laboratoria/LabProyectos/LIM014-mdlinks/src/index.js')).toStrictEqual(['1.md', 'README.md']);
+  });
+});

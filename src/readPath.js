@@ -3,9 +3,6 @@ const path = require('path');
 const marked = require('marked');
 /* MIs rutas */
 
-const miRuta = '/home/laboratoria/LabProyectos/LIM014-mdlinks';
-/* const ruta = '/home/laboratoria/LabProyectos/LIM014-mdlinks/test/md-links.spec.js'; */
-
 /* const miRuta = './index.js';
 
 /* Verficar si existe una ruta */
@@ -40,15 +37,15 @@ function archivo() {
   return result;
 }
 
-console.log('40', archivo('/home/laboratoria/LabProyectos/LIM014-mdlinks'));
+// console.log('40', archivo('/home/laboratoria/LabProyectos/LIM014-mdlinks'));
 
 function leerArchivo(route) {
   const readFile = fs.readFileSync(route).toString();
   return readFile;
 }
-console.log(leerArchivo('/home/laboratoria/LabProyectos/LIM014-mdlinks/README.md'));
+// console.log(leerArchivo('/home/laboratoria/LabProyectos/LIM014-mdlinks/README.md'));
 
-/* EXtraccion de arrays */
+/* EXtraccion de arrays */ // RUTA del archivo, link y text
 const arrayLinks = (route) => {
   const renderer = new marked.Renderer();
   const readingFile = leerArchivo(route); // ALMACENA EL VALOR DE LA FUNCION.
@@ -61,35 +58,46 @@ const arrayLinks = (route) => {
   return links;
 };
 
-console.log('64', arrayLinks('/home/laboratoria/LabProyectos/LIM014-mdlinks/1.md'));
+// console.log('64', arrayLinks('/home/laboratoria/LabProyectos/LIM014-mdlinks/1.md'));
 
+// Devuelve todos los links de un archvio
 const allArrayLinks = (route) => {
   let allLinks = [];
   const links = archivo(route);
-  links.forEach((route) => {
+  links.forEach(() => {
     allLinks = allLinks.concat(arrayLinks(route));
   });
   return allLinks;
 };
-console.log('74', allArrayLinks('/home/laboratoria/LabProyectos/LIM014-mdlinks/1.md'));
+// console.log('74', allArrayLinks('/home/laboratoria/LabProyectos/LIM014-mdlinks/1.md')); // Duda de porque me trae los link de todos los archivos y no de la ruta que especifico aca
 
+// Stats -- Devuelve TotalLinks y UniqueLinks
 const statsList = (route) => {
   const allLinks = allArrayLinks(route);
-  const statsList = [];
+  const statssList = [];
 
   allLinks.forEach((element) => {
-    if (!statsList.includes(element.href)) statsList.push(element.href);
+    if (!statssList.includes(element.href)) statssList.push(element.href);
   });
   const all = allLinks.length;
-  const unique = statsList.length;
-
-  return [`Total : ${all}`, `Unique : ${unique}`];
+  const unique = statssList.length;
+  const result = `Total : ${all} \n Unique : ${unique}`;
+  // return [`Total : ${all}`, `Unique : ${unique}`];
+  return result;
 };
 
-console.log('88', statsList('/home/laboratoria/LabProyectos/LIM014-mdlinks/1.md'));
+// console.log('88', statsList('/home/laboratoria/LabProyectos/LIM014-mdlinks/1.md'));
+
+const brokenLinks = (route) => {
+  const linksBroken = Array.from(route).filter((element) => element.status >= 400);
+  const stats = `Broken : ${linksBroken.length}`;
+  return stats;
+};
+// console.log('96', brokenLinks('/home/laboratoria/LabProyectos/LIM014-mdlinks/1.md'));
 
 module.exports = {
   miFuncion,
   archivo,
   leerArchivo,
+  arrayLinks,
 };
