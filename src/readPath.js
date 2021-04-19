@@ -1,11 +1,15 @@
+/* eslint-disable no-param-reassign */
+/* eslint-disable no-unreachable */
 const fs = require('fs');
 const path = require('path');
 const marked = require('marked');
+const fetch = require('node-fetch');
+const { resolve } = require('path');
 /* MIs rutas */
 
-/* const miRuta = './index.js';
+// const miRuta = '/home/laboratoria/LabProyectos/LIM014-mdlinks/1.md';
 
-/* Verficar si existe una ruta */
+/* Funcion 1 - Verficar si existe una ruta */
 function miFuncion(route) {
   if (fs.existsSync(route)) { // SI mi ruta existe
     if (path.isAbsolute(route)) { // Si mi ruta es absoluta
@@ -18,9 +22,11 @@ function miFuncion(route) {
 
 /* console.log(miFuncion(rutaRelativa)); */
 
-function archivo() {
+// Verificar Ruta
+function checkFile(miRuta) {
+  // console.log('Esto deberia aparecer', miRuta);
   const fnRuta = miFuncion(miRuta); // ALMACENA EL VALOR DE LA FUNCION.
-  console.log('25', fnRuta);
+  // console.log('25', fnRuta);
   let result = [];
   if (fs.statSync(fnRuta).isDirectory() === true) {
     const listaArchivos = fs.readdirSync(fnRuta);
@@ -31,24 +37,25 @@ function archivo() {
       }
     });
   } else {
-    console.log('35', result);
+    if (path.extname(fnRuta) === '.md') {
+      result.push(fnRuta);
+    }
+    console.log('35', fnRuta);
   }
   console.log('37', result);
   return result;
 }
+// console.log('40', checkFile());
 
-// console.log('40', archivo('/home/laboratoria/LabProyectos/LIM014-mdlinks'));
+// Leer archivo
+const readFile = (route) => fs.readFileSync(route).toString();
 
-function leerArchivo(route) {
-  const readFile = fs.readFileSync(route).toString();
-  return readFile;
-}
-// console.log(leerArchivo('/home/laboratoria/LabProyectos/LIM014-mdlinks/README.md'));
+// console.log(readFile('/home/laboratoria/LabProyectos/LIM014-mdlinks/README.md'));
 
 /* EXtraccion de arrays */ // RUTA del archivo, link y text
 const arrayLinks = (route) => {
   const renderer = new marked.Renderer();
-  const readingFile = leerArchivo(route); // ALMACENA EL VALOR DE LA FUNCION.
+  const readingFile = readFile(route); // ALMACENA EL VALOR DE LA FUNCION.
   let links = [];
   renderer.link = (href, file, text) => { // Define la salida de propiedades
     links = links.concat([{ href, text, path: route }]);
@@ -57,25 +64,44 @@ const arrayLinks = (route) => {
 
   return links;
 };
-
 // console.log('64', arrayLinks('/home/laboratoria/LabProyectos/LIM014-mdlinks/1.md'));
 
-// Devuelve todos los links de un archvio
-const allArrayLinks = (route) => {
+// Devuelve en un array todos los links de un archvio
+const allArrayLinks = (miRuta) => {
   let allLinks = [];
-  const links = archivo(route);
-  links.forEach(() => {
-    allLinks = allLinks.concat(arrayLinks(route));
+  const links = checkFile(miRuta);
+  links.forEach((element) => {
+    allLinks = allLinks.concat(arrayLinks(element));
+  //  console.log('Soy tu elemento', element);
   });
   return allLinks;
 };
-// console.log('74', allArrayLinks('/home/laboratoria/LabProyectos/LIM014-mdlinks/1.md')); // Duda de porque me trae los link de todos los archivos y no de la ruta que especifico aca
+// console.log('74', allArrayLinks());
+// Duda de porque me trae los link de todos los archivos y no de la ruta que especifico aca
 
-// Stats -- Devuelve TotalLinks y UniqueLinks
+// console.log('88', statsList('/home/laboratoria/LabProyectos/LIM014-mdlinks/1.md'));
+
+const validate = (all) => {
+ // const mdLinks = allArrayLinks();
+  const linksVal = all.map((link) => fetch(link.href).then((res) => {
+    // eslint-disable-next-line no-unused-expressions
+    link.status = res.status;
+    link.message = res.status === 200 ? 'OK' : 'FAIL';
+    // console.log(link);
+    return link;
+  }).catch(() => ({
+    status: 404,
+    statusText: 'Fail',
+  })));
+  // console.log('106', linksVal);
+  return Promise.all(linksVal);
+};
+// validate(miRuta); ==> Promise.all(linksVal);
+// console.log('107', validate(miRuta));
+// validate(miRuta).then((linksVal) => console.log('108', linksVal));
 const statsList = (route) => {
   const allLinks = allArrayLinks(route);
   const statssList = [];
-
   allLinks.forEach((element) => {
     if (!statssList.includes(element.href)) statssList.push(element.href);
   });
@@ -86,7 +112,11 @@ const statsList = (route) => {
   return result;
 };
 
-// console.log('88', statsList('/home/laboratoria/LabProyectos/LIM014-mdlinks/1.md'));
+const totalLinks = (route) => {
+  const totalLinks = allArrayLinks(route);
+  const list = totalLinks.map((element) => (`${element.path} ${element.href} ${element.text}`));
+  return Promise.all(list);
+};
 
 const brokenLinks = (route) => {
   const linksBroken = Array.from(route).filter((element) => element.status >= 400);
@@ -97,7 +127,12 @@ const brokenLinks = (route) => {
 
 module.exports = {
   miFuncion,
-  archivo,
-  leerArchivo,
+  checkFile,
+  readFile,
   arrayLinks,
+  allArrayLinks,
+  validate,
+  statsList,
+  totalLinks,
+  brokenLinks,
 };
