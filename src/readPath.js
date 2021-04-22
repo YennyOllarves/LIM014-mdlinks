@@ -4,7 +4,7 @@ const fs = require('fs');
 const path = require('path');
 const marked = require('marked');
 const fetch = require('node-fetch');
-const { resolve } = require('path');
+
 /* MIs rutas */
 
 // const miRuta = '/home/laboratoria/LabProyectos/LIM014-mdlinks/1.md';
@@ -17,7 +17,7 @@ function miFuncion(route) {
     }
     return path.resolve(route); // Sino entonces es realtiva, me la conviertes en absoluta.
   }
-  return console.log('Ruta no existente'); // SI NINGUNA DE LAS 2, PUES NO EXISTE.
+  return ('Ruta no existente'); // SI NINGUNA DE LAS 2, PUES NO EXISTE.
 }
 
 /* console.log(miFuncion(rutaRelativa)); */
@@ -36,13 +36,12 @@ function checkFile(miRuta) {
         result = result.concat(filePath);
       }
     });
-  } else {
-    if (path.extname(fnRuta) === '.md') {
-      result.push(fnRuta);
-    }
-    console.log('35', fnRuta);
+  } else if (path.extname(fnRuta) === '.md') {
+    result.push(fnRuta);
   }
-  console.log('37', result);
+  // console.log('35', fnRuta);
+
+  // console.log('37', result);
   return result;
 }
 // console.log('40', checkFile());
@@ -50,7 +49,7 @@ function checkFile(miRuta) {
 // Leer archivo
 const readFile = (route) => fs.readFileSync(route).toString();
 
-// console.log(readFile('/home/laboratoria/LabProyectos/LIM014-mdlinks/README.md'));
+// console.log('52', readFile('/home/laboratoria/LabProyectos/LIM014-mdlinks/README.md'));
 
 /* EXtraccion de arrays */ // RUTA del archivo, link y text
 const arrayLinks = (route) => {
@@ -72,7 +71,7 @@ const allArrayLinks = (miRuta) => {
   const links = checkFile(miRuta);
   links.forEach((element) => {
     allLinks = allLinks.concat(arrayLinks(element));
-  //  console.log('Soy tu elemento', element);
+    // console.log('Soy tu elemento', element);
   });
   return allLinks;
 };
@@ -82,16 +81,16 @@ const allArrayLinks = (miRuta) => {
 // console.log('88', statsList('/home/laboratoria/LabProyectos/LIM014-mdlinks/1.md'));
 
 const validate = (all) => {
- // const mdLinks = allArrayLinks();
-  const linksVal = all.map((link) => fetch(link.href).then((res) => {
+  // const mdLinks = allArrayLinks();
+  const linksVal = all.map((link) => fetch(link.href).then((response) => {
     // eslint-disable-next-line no-unused-expressions
-    link.status = res.status;
-    link.message = res.status === 200 ? 'OK' : 'FAIL';
+    link.status = response.status;
+    link.message = response.status === 200 ? 'OK' : 'FAIL';
     // console.log(link);
     return link;
   }).catch(() => ({
     status: 404,
-    statusText: 'Fail',
+    message: 'Fail',
   })));
   // console.log('106', linksVal);
   return Promise.all(linksVal);
@@ -99,31 +98,13 @@ const validate = (all) => {
 // validate(miRuta); ==> Promise.all(linksVal);
 // console.log('107', validate(miRuta));
 // validate(miRuta).then((linksVal) => console.log('108', linksVal));
-const statsList = (route) => {
-  const allLinks = allArrayLinks(route);
-  const statssList = [];
-  allLinks.forEach((element) => {
-    if (!statssList.includes(element.href)) statssList.push(element.href);
-  });
-  const all = allLinks.length;
-  const unique = statssList.length;
-  const result = `Total : ${all} \n Unique : ${unique}`;
-  // return [`Total : ${all}`, `Unique : ${unique}`];
-  return result;
-};
 
+// console.log('96', brokenLinks('/home/laboratoria/LabProyectos/LIM014-mdlinks/1.md'));
 const totalLinks = (route) => {
-  const totalLinks = allArrayLinks(route);
-  const list = totalLinks.map((element) => (`${element.path} ${element.href} ${element.text}`));
+  const totLinks = allArrayLinks(route);
+  const list = totLinks.map((element) => (`${element.path} ${element.href} ${element.text}`));
   return Promise.all(list);
 };
-
-const brokenLinks = (route) => {
-  const linksBroken = Array.from(route).filter((element) => element.status >= 400);
-  const stats = `Broken : ${linksBroken.length}`;
-  return stats;
-};
-// console.log('96', brokenLinks('/home/laboratoria/LabProyectos/LIM014-mdlinks/1.md'));
 
 module.exports = {
   miFuncion,
@@ -132,7 +113,5 @@ module.exports = {
   arrayLinks,
   allArrayLinks,
   validate,
-  statsList,
   totalLinks,
-  brokenLinks,
 };
